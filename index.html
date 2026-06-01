@@ -193,7 +193,7 @@ input::placeholder{color:#555}
 
 <!-- HEADER -->
 <div class="header">
-  <div class="header-badge">🤠 Arraiá 2026</div>
+  <div class="header-badge">🤠 Arraiá 2025</div>
   <h1>Rifa <span>Pratique</span><br>Santa Inês 2</h1>
   <p>Escolha os seus números e concorra a prémios incríveis!</p>
 </div>
@@ -315,7 +315,7 @@ input::placeholder{color:#555}
     </button>
   </div>
 
-  <!-- ETAPA 2: PIX -->
+  <!-- ETAPA 2: PIX E ENVIO POR EMAIL -->
   <div id="etapa2" style="display:none">
     <div class="card">
       <div class="card-title mb-6">✅ Pedido registado!</div>
@@ -333,14 +333,16 @@ input::placeholder{color:#555}
         <div class="pix-steps"><strong>Como pagar:</strong><br>1. Abra a app do seu banco<br>2. PIX → Pagar com chave (E-mail)<br>3. Cole a chave acima<br>4. Confirme o valor e pague<br>5. Guarde o comprovativo! 📲</div>
       </div>
     </div>
+    
+    <!-- NOVO BLOCO: Envio de Comprovativo por E-mail -->
     <div class="card" id="card-comprovante">
-      <div class="card-title mb-6">📎 Anexar Comprovativo</div>
-      <p class="text-muted mb-10" style="font-size:0.75rem">Anexe o print ou PDF do pagamento para acelerar a liberação.</p>
-      <input type="file" id="f-comprovante" accept="image/*,application/pdf" style="display:none" onchange="window.processarAnexo(event)">
-      <button class="btn btn-ghost" id="btn-anexo" onclick="document.getElementById('f-comprovante').click()">
-        📄 Escolher ficheiro...
+      <div class="card-title mb-6">📧 Enviar Comprovativo</div>
+      <p class="text-muted mb-10" style="font-size:0.75rem">Para liberar os seus números rapidamente, envie o comprovativo de pagamento para o nosso e-mail.</p>
+      <button class="btn btn-ghost" id="btn-anexo" onclick="window.enviarEmailComprovante()">
+        ✉️ Enviar por E-mail
       </button>
     </div>
+
     <div class="card">
       <div class="card-title mb-6">📋 Resumo do pedido</div>
       <div class="resumo-row"><span>Nome</span><span id="p-nome" style="font-size:.85rem;text-align:right;max-width:60%"></span></div>
@@ -433,7 +435,7 @@ import { getAuth, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassw
 import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // ═══════════════════════════════════════════════════════
-// AS SUAS CREDENCIAIS DO FIREBASE ESTÃO AQUI:
+// AS SUAS CREDENCIAIS DO FIREBASE:
 // ═══════════════════════════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyBtQJlHjNnOfzAgPFEkTODHprfbpOZXHD0",
@@ -446,12 +448,13 @@ const firebaseConfig = {
 };
 
 const C = {
-  TOTAL:       1000,
-  BLOCO:       100,
-  PRECO:       10,
-  PIX_CHAVE:   'lemosmjlp@gmail.com', 
-  MAX_LOGIN:   5,       
-  LOCK_MIN:    10,      
+  TOTAL:             1000,
+  BLOCO:             100,
+  PRECO:             10,
+  PIX_CHAVE:         'lemosmjlp@gmail.com', 
+  EMAIL_COMPROVANTE: 'marcelopratiquesi@gmail.com', // O email para onde os clientes vão enviar o comprovativo
+  MAX_LOGIN:         5,       
+  LOCK_MIN:          10,      
 };
 
 // Gerador Aleatório Seguro (Nível Criptográfico)
@@ -485,7 +488,6 @@ let userId = null;
 
 const initAuth = async () => {
   try {
-    // Para clientes normais, ligamos de forma silenciosa e anónima.
     await signInAnonymously(auth);
   } catch (err) {
     console.error("Auth Firebase Falhou:", err);
@@ -504,17 +506,10 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// Apenas inicia se o utilizador já colocou as chaves
-if(firebaseConfig.apiKey !== "COLE_A_SUA_API_KEY_AQUI") {
-   initAuth();
-} else {
-   console.warn("⚠️ AVISO: O Firebase não está configurado. Insira as suas chaves na linha 483.");
-   document.getElementById('btn-pagar').textContent = "⚠️ Insira as chaves Firebase no código";
-}
+initAuth();
 
 function setupRealtimeListeners() {
   if (!userId) return;
-  // Caminhos para as coleções do Firestore na raiz
   const pedRef = collection(db, 'pedidos');
   onSnapshot(pedRef, (snap) => {
     S.pedidos = snap.docs.map(d => d.data());
@@ -799,7 +794,7 @@ function validarForm() {
 }
 
 // ═══════════════════════════════════════════════════════
-// CLOUD UPLOAD (Processando o Pagamento)
+// CLOUD UPLOAD E GERAÇÃO DE EMAIL
 // ═══════════════════════════════════════════════════════
 window.irPagar = async function() {
   if (!userId) { toast('Erro: Sem ligação à Nuvem.', 'err'); return; }
@@ -829,8 +824,7 @@ window.irPagar = async function() {
     nome, cpf: document.getElementById('f-cpf').value.trim(), tel, email, end,
     nums:   [...S.sel],
     valor,
-    status: 'pendente',
-    comprovante: false
+    status: 'pendente'
   };
 
   pedidoAtualId = pedido.id;
@@ -845,15 +839,6 @@ window.irPagar = async function() {
     document.getElementById('p-nums').textContent    = pedido.nums.join(', ');
     document.getElementById('p-id').textContent      = pedido.id;
     document.getElementById('p-total').textContent   = 'R$ '+valor;
-
-    const btnAnexo = document.getElementById('btn-anexo');
-    if(btnAnexo) {
-        btnAnexo.className = "btn btn-ghost";
-        btnAnexo.textContent = "📄 Escolher ficheiro...";
-        btnAnexo.disabled = false;
-    }
-    const fComp = document.getElementById('f-comprovante');
-    if(fComp) fComp.value = "";
 
     document.getElementById('etapa1').style.display='none';
     document.getElementById('etapa2').style.display='block';
@@ -873,28 +858,16 @@ window.voltarEtapa1 = function(){
   window.scrollTo(0,0);
 }
 
-window.processarAnexo = async function(e) {
-  const file = e.target.files[0];
-  if(!file) return;
-  
-  const btn = document.getElementById('btn-anexo');
-  btn.textContent = "A processar...";
-  btn.disabled = true;
-
-  setTimeout(async () => {
-      if(userId && pedidoAtualId) {
-          try {
-              await updateDoc(doc(db, 'pedidos', pedidoAtualId), { 
-                  comprovante: true, 
-                  nomeArquivo: file.name 
-              });
-          } catch(err) { console.warn(err); }
-      }
-      
-      btn.className = "btn btn-green";
-      btn.textContent = "✅ Anexado: " + (file.name.length > 15 ? file.name.substring(0,15)+"..." : file.name);
-      toast("Comprovativo vinculado ao seu pedido!", "ok");
-  }, 600);
+window.enviarEmailComprovante = function() {
+    if(!pedidoAtualId) return;
+    const p = S.pedidos.find(x => x.id === pedidoAtualId);
+    if(!p) return;
+    
+    const subject = encodeURIComponent(`Comprovativo Rifa - Pedido ${p.id}`);
+    const body = encodeURIComponent(`Olá!\n\nSegue em anexo o comprovativo de pagamento da rifa.\n\nMeus dados:\nNome: ${p.nome}\nCPF: ${p.cpf}\nPedido: ${p.id}\nValor: R$ ${p.valor}\n\n[ANEXE AQUI A FOTO DO COMPROVATIVO ANTES DE ENVIAR]`);
+    
+    // Abre a aplicação de e-mail do telemóvel/computador com o assunto e texto preenchidos
+    window.location.href = `mailto:${C.EMAIL_COMPROVANTE}?subject=${subject}&body=${body}`;
 }
 
 window.finalizarCompra = function(){
@@ -1057,6 +1030,7 @@ window.renderValidador = function(){
   el.innerHTML=lista.map(p=>{
     const data=new Date(p.ts).toLocaleString('pt-BR');
     const horas=Math.max(0,24-(Date.now()-p.ts)/3600000).toFixed(1);
+    
     return `<div class="pedido-item">
       <div class="pedido-top">
         <div>
@@ -1066,16 +1040,15 @@ window.renderValidador = function(){
             📧 ${esc(p.email)}<br>
             💰 R$ ${p.valor} · Pedido: ${esc(p.id)}<br>
             🕒 ${data}${p.status==='pendente'?` · ⏳ Expira em ${horas}h`:''}
-            ${p.comprovante ? `<br><span style="color:#3b82f6;font-weight:600">📎 Comprovativo Anexado</span>` : ''}
           </div>
           <div class="pedido-nums">${esc(p.nums.join(' · '))}</div>
         </div>
         <div>
           <span class="badge badge-${p.status}">${p.status}</span>
           <div class="pedido-acoes" style="margin-top:8px">
-            ${p.status!=='pago'?`<button class="btn btn-green btn-sm" onclick="window.confirmarPag('${p.id}')">✅ Confirmar</button>`:''}
-            ${p.status==='pendente'?`<button class="btn btn-danger btn-sm" onclick="window.expirarPed('${p.id}')">❌ Expirar</button>`:''}
-            ${p.status==='pago'?`<button class="btn btn-ghost btn-sm" onclick="window.cancelarPag('${p.id}')">↩ Cancelar</button>`:''}
+            ${p.status === 'pendente' ? `<button class="btn btn-green btn-sm" onclick="window.confirmarPag('${p.id}')">✅ Confirmar</button>` : ''}
+            ${p.status === 'pendente' ? `<button class="btn btn-danger btn-sm" onclick="window.expirarPed('${p.id}')">❌ Expirar</button>` : ''}
+            ${p.status === 'pago' ? `<button class="btn btn-ghost btn-sm" onclick="window.cancelarPag('${p.id}')">↩ Cancelar</button>` : ''}
           </div>
         </div>
       </div>
