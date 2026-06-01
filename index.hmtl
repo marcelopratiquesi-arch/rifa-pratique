@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Rifa do Arraiá 🎪 Pratique Santa Inês 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0d;--surface:#161616;--surface2:#1f1f1f;
+  --border:#2a2a2a;--border2:#333;--text:#f0f0f0;--muted:#888;
+  --accent:#f5a623;--accent2:#e8820c;--green:#22c55e;--red:#ef4444;
+  --radius:14px;--radius-sm:8px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* HEADER */
+.header{background:linear-gradient(160deg,#1a1000 0%,#0d0d0d 60%);border-bottom:1px solid #2a1f00;padding:28px 20px 24px;text-align:center;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,#f5a62322 0%,transparent 70%);pointer-events:none}
+.header-badge{display:inline-flex;align-items:center;gap:6px;background:#f5a62318;border:1px solid #f5a62344;border-radius:20px;padding:4px 12px;font-size:.72rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.header h1{font-family:'Syne',sans-serif;font-size:clamp(1.7rem,6vw,2.6rem);font-weight:800;color:var(--text);line-height:1.1}
+.header h1 span{color:var(--accent)}
+.header p{font-size:.85rem;color:var(--muted);margin-top:6px}
+
+/* NAV ADMIN */
+.nav-admin{display:none;background:var(--surface);border-bottom:1px solid var(--border)}
+.nav-admin button{flex:1;padding:14px 8px;background:none;border:none;color:var(--muted);font-family:'Inter',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid transparent;transition:all .2s}
+.nav-admin button.active{color:var(--accent);border-bottom-color:var(--accent);background:#f5a6230a}
+.nav-admin button:hover:not(.active){color:var(--text)}
+
+/* PAGES */
+.page{display:none;padding:20px;max-width:680px;margin:0 auto;padding-bottom:60px}
+.page.active{display:block}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--text)}
+.card-sub{font-size:.75rem;color:var(--muted);margin-top:2px}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{margin-bottom:12px}
+.form-group:last-child{margin-bottom:0}
+label{display:block;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+input[type=text],input[type=tel],input[type=email],input[type=password]{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:11px 13px;color:var(--text);font-family:'Inter',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s}
+input:focus{border-color:var(--accent)}
+input::placeholder{color:#555}
+.input-erro{border-color:var(--red)!important}
+.campo-erro{font-size:.7rem;color:var(--red);margin-top:4px;display:none}
+.campo-erro.vis{display:block}
+
+/* BLOCO PROGRESS */
+.bloco-progress{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.bloco-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.bloco-label{font-size:.8rem;font-weight:600;color:var(--text)}
+.bloco-count{font-size:.75rem;color:var(--muted)}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .5s ease}
+.bloco-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.bloco-chip{padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600;border:1px solid var(--border2);color:var(--muted);background:none}
+.bloco-chip.atual{border-color:var(--accent);color:var(--accent);background:#f5a6230d}
+.bloco-chip.cheio{border-color:var(--green);color:var(--green);background:#22c55e0d}
+.bloco-chip.bloqueado{opacity:.3}
+
+/* GRADE */
+.grade-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.grade-selecionados{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--accent)}
+.grade-container{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-height:320px;overflow-y:auto;padding:2px}
+.grade-container::-webkit-scrollbar{width:4px}
+.grade-container::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.num-cell{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);color:#666;transition:all .12s;user-select:none;-webkit-tap-highlight-color:transparent}
+.num-cell:hover:not(.ocupado):not(.reservado):not(.bloqueado){border-color:var(--accent);color:var(--accent);background:#f5a6231a;transform:scale(1.08)}
+.num-cell.selecionado{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700;transform:scale(1.05)}
+.num-cell.ocupado{background:#22c55e14;border-color:#22c55e44;color:#22c55e88;cursor:default}
+.num-cell.reservado{background:var(--surface2);border-color:var(--border);color:#444;cursor:default}
+.num-cell.bloqueado{background:transparent;border-color:#333;color:#666;cursor:not-allowed;opacity:0.6}
+
+/* LEGENDA */
+.legenda{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+.legenda-item{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--muted)}
+.ldot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* PACOTES */
+.pacotes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pacote{background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius);padding:12px 8px;text-align:center;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.pacote:hover{border-color:var(--accent);background:#f5a6230d}
+.pacote.sel{border-color:var(--accent);background:#f5a62318}
+.pacote .p-num{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--accent);line-height:1}
+.pacote .p-label{font-size:.65rem;color:var(--muted);margin:3px 0 5px;text-transform:uppercase;letter-spacing:.3px}
+.pacote .p-val{font-size:.85rem;font-weight:600;color:var(--text)}
+.pacote .p-bonus{font-size:.62rem;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#000;font-weight:700;padding:2px 6px;border-radius:4px;display:inline-block;margin-top:4px}
+.pacote .p-tag{position:absolute;top:0;right:0;background:var(--accent);color:#000;font-size:.55rem;font-weight:700;padding:2px 7px;border-radius:0 var(--radius) 0 6px;text-transform:uppercase;letter-spacing:.3px}
+
+/* RESUMO E PIX */
+.resumo{background:linear-gradient(135deg,#1a1000,#161616);border:1.5px solid #f5a62333;border-radius:var(--radius);padding:16px;margin:14px 0}
+.resumo-row{display:flex;justify-content:space-between;font-size:.85rem;padding:5px 0}
+.resumo-row.total{border-top:1px solid #f5a62322;margin-top:8px;padding-top:12px;font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--accent)}
+.nums-lista{font-size:.72rem;color:var(--green);margin-top:4px;word-break:break-all;line-height:1.6}
+
+.pix-box{background:linear-gradient(135deg,#0a1f0f,#111);border:1.5px solid #22c55e33;border-radius:var(--radius);padding:20px;text-align:center}
+.pix-nome{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.pix-banco{font-size:.75rem;color:var(--muted);margin-bottom:14px}
+.pix-chave-box{background:#ffffff0d;border:1px solid #22c55e33;border-radius:var(--radius-sm);padding:12px;font-size:.82rem;color:var(--green);word-break:break-all;cursor:pointer;transition:background .2s;margin-bottom:8px}
+.pix-chave-box:hover{background:#22c55e0d}
+.pix-copy-hint{font-size:.7rem;color:var(--muted);margin-bottom:16px}
+.pix-valor{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--accent);margin:12px 0 4px}
+.pix-steps{font-size:.78rem;color:var(--muted);line-height:2;text-align:left;margin-top:14px}
+.pix-steps strong{color:var(--text)}
+
+/* BOTÕES E EXTRAS */
+.btn{width:100%;padding:15px;border:none;border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.2px}
+.btn+.btn{margin-top:8px}
+.btn-accent{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000}
+.btn-accent:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px #f5a62340}
+.btn-accent:disabled{opacity:.35;cursor:default;transform:none;box-shadow:none}
+.btn-green{background:linear-gradient(135deg,#16a34a,var(--green));color:#fff}
+.btn-green:hover{transform:translateY(-2px);box-shadow:0 8px 28px #22c55e40}
+.btn-ghost{background:var(--surface2);border:1px solid var(--border2);color:var(--text)}
+.btn-ghost:hover{background:var(--surface)}
+.btn-sm{width:auto;padding:7px 14px;font-size:.75rem;border-radius:var(--radius-sm)}
+.btn-danger{background:#ef444422;border:1px solid #ef444444;color:var(--red)}
+
+/* STATS E ADMIN */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
+.stat-n{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--accent);line-height:1}
+.stat-l{font-size:.65rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.3px}
+
+.filtros{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.filtro{padding:6px 14px;border-radius:20px;border:1px solid var(--border2);background:none;color:var(--muted);font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.filtro.active{border-color:var(--accent);color:var(--accent);background:#f5a6230d}
+.busca{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:.88rem;outline:none;margin-bottom:12px}
+.busca:focus{border-color:var(--accent)}
+.pedido-item{padding:14px 0;border-bottom:1px solid var(--border)}
+.pedido-item:last-child{border-bottom:none}
+.pedido-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pedido-nome{font-weight:600;font-size:.9rem}
+.pedido-meta{font-size:.72rem;color:var(--muted);margin-top:3px;line-height:1.7}
+.pedido-nums{font-size:.7rem;color:var(--green);margin-top:4px}
+.pedido-acoes{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.badge-pago{background:#22c55e18;color:var(--green);border:1px solid #22c55e44}
+.badge-pendente{background:#f5a62318;color:var(--accent);border:1px solid #f5a62344}
+.badge-expirado{background:#ef444418;color:var(--red);border:1px solid #ef444444}
+
+/* SORTEIO E LOGIN */
+.sorteio-arena{text-align:center;padding:30px 10px;border:1px dashed var(--border2);border-radius:var(--radius);margin-bottom:14px;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sorteio-num{font-family:'Syne',sans-serif;font-size:clamp(5rem,22vw,8rem);font-weight:800;color:var(--accent);line-height:1;text-shadow:0 0 60px #f5a62366}
+.sorteio-dono{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:700;color:var(--text);margin-top:10px}
+.historico-item{padding:10px 0;border-bottom:1px solid var(--border);font-size:.82rem}
+.historico-item:last-child{border-bottom:none}
+.login-wrap{max-width:360px;margin:40px auto}
+.tentativas-aviso{font-size:.75rem;color:var(--red);margin-top:8px;text-align:center;display:none}
+
+/* MODAL E TOAST */
+.modal-overlay{display:none;position:fixed;inset:0;background:#000000bb;z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.vis{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:24px;max-width:360px;width:100%}
+.modal-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:12px}
+.modal-body{font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:20px}
+.modal-btns{display:flex;gap:8px}
+.modal-btns .btn{flex:1}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:12px 22px;border-radius:30px;font-size:.85rem;font-weight:600;transition:transform .3s;z-index:9999;white-space:nowrap;box-shadow:0 8px 32px #00000066}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:var(--green);color:var(--green)}
+.toast.err{border-color:var(--red);color:var(--red)}
+
+/* UTILS */
+.mt-8{margin-top:8px}.mt-10{margin-top:10px}.mt-14{margin-top:14px}
+.mb-6{margin-bottom:6px}.mb-10{margin-bottom:10px}
+.text-muted{color:var(--muted);font-size:.78rem}
+.text-accent{color:var(--accent)}
+.text-green{color:var(--green)}
+.text-red{color:var(--red)}
+.text-center{text-align:center}
+.sep{border:none;border-top:1px solid var(--border);margin:16px 0}
+.empty{padding:30px;text-align:center;color:var(--muted);font-size:.85rem}
+
+@media(max-width:380px){
+  .grade-container{grid-template-columns:repeat(8,1fr)}
+  .pacotes-grid{grid-template-columns:repeat(3,1fr)}
+  .form-row{grid-template-columns:1fr}
+  .modal-btns{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-badge">🤠 Arraiá 2025</div>
+  <h1>Rifa <span>Pratique</span><br>Santa Inês 2</h1>
+  <p>Escolha os seus números e concorra a prémios incríveis!</p>
+</div>
+
+<!-- NAV ADMIN -->
+<div class="nav-admin" id="nav-admin">
+  <button onclick="window.showPage('comprar')">🎟️ Comprar</button>
+  <button id="nav-v" onclick="window.showAdminPage('validador')">✅ Validar</button>
+  <button id="nav-s" onclick="window.showAdminPage('sorteio')">🎲 Sortear</button>
+  <button onclick="window.fazerLogout()" style="flex: 0.5; color: var(--red);">🚪 Sair</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL CONFIRMAÇÃO -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost btn-sm" onclick="window.fecharModal()">Cancelar</button>
+      <button class="btn btn-accent btn-sm" id="modal-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     PÁGINA: COMPRAR
+═══════════════════════════════ -->
+<div class="page active" id="page-comprar">
+  <div id="etapa1">
+
+    <!-- Dados -->
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">Os seus dados</div><div class="card-sub">Campos com * são obrigatórios</div></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome Completo *</label>
+          <input type="text" id="f-nome" placeholder="Nome e apelido" autocomplete="name">
+          <div class="campo-erro" id="e-nome">Digite o nome e o apelido</div>
+        </div>
+        <div class="form-group">
+          <label>CPF *</label>
+          <input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric">
+          <div class="campo-erro" id="e-cpf">CPF inválido</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefone / WhatsApp *</label>
+          <input type="tel" id="f-tel" placeholder="(31) 99999-9999" maxlength="15" inputmode="numeric">
+          <div class="campo-erro" id="e-tel">Telefone inválido</div>
+        </div>
+        <div class="form-group">
+          <label>E-mail *</label>
+          <input type="email" id="f-email" placeholder="seu@email.com" inputmode="email">
+          <div class="campo-erro" id="e-email">E-mail inválido</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Morada</label>
+        <input type="text" id="f-end" placeholder="Rua, número, bairro, cidade" autocomplete="street-address">
+      </div>
+    </div>
+
+    <!-- Progresso de blocos -->
+    <div class="bloco-progress" id="bloco-progress">
+      <div class="bloco-info">
+        <span class="bloco-label" id="bloco-label">Bloco atual: 001–100</span>
+        <span class="bloco-count" id="bloco-count">0/100 vendidos</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="bloco-chips" id="bloco-chips"></div>
+    </div>
+
+    <!-- Pacotes -->
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">Pacotes Rápidos</div><div class="card-sub">Adiciona números aleatórios à sua compra</div></div>
+      </div>
+      <div class="pacotes-grid">
+        <div class="pacote" onclick="window.aplicarPacote(1,this)"><div class="p-num">+1</div><div class="p-label">número</div><div class="p-val">R$ 10</div></div>
+        <div class="pacote" onclick="window.aplicarPacote(3,this)"><div class="p-num">+3</div><div class="p-label">números</div><div class="p-val">R$ 30</div></div>
+        <div class="pacote" onclick="window.aplicarPacote(5,this)"><div class="p-num">+5</div><div class="p-label">números</div><div class="p-val">R$ 50</div></div>
+        <div class="pacote" onclick="window.aplicarPacote(6,this)"><div class="p-tag">Oferta</div><div class="p-num">+6</div><div class="p-label">números</div><div class="p-val">R$ 50</div><div class="p-bonus">+1 grátis</div></div>
+        <div class="pacote" onclick="window.aplicarPacote(10,this)"><div class="p-num">+10</div><div class="p-label">números</div><div class="p-val">R$ 100</div></div>
+        <div class="pacote" onclick="window.aplicarPacote(13,this)"><div class="p-tag">Melhor</div><div class="p-num">+13</div><div class="p-label">números</div><div class="p-val">R$ 100</div><div class="p-bonus">+3 grátis</div></div>
+      </div>
+    </div>
+
+    <!-- Grade -->
+    <div class="card">
+      <div class="grade-header">
+        <div><div class="card-title">Escolha os seus números</div><div class="card-sub" id="grade-sub">Toque nos números disponíveis</div></div>
+        <div class="grade-selecionados" id="grade-count">0 sel.</div>
+      </div>
+      <div class="grade-container" id="grade"></div>
+      <div class="legenda">
+        <div class="legenda-item"><div class="ldot" style="background:var(--accent)"></div>Selecionado</div>
+        <div class="legenda-item"><div class="ldot" style="background:#22c55e14;border:1px solid #22c55e44"></div>Vendido</div>
+        <div class="legenda-item"><div class="ldot" style="background:var(--surface2);border:1px solid var(--border)"></div>Reservado 24h</div>
+        <div class="legenda-item"><div class="ldot" style="background:transparent;border:1px solid #333"></div>Bloqueado</div>
+      </div>
+    </div>
+
+    <!-- Resumo -->
+    <div class="resumo" id="resumo" style="display:none">
+      <div class="resumo-row"><span>Qtd. selecionada</span><span id="r-qtd" class="text-accent">—</span></div>
+      <div class="resumo-row" id="r-bonus-row" style="display:none"><span>🎁 Bónus incluído</span><span id="r-bonus" class="text-green"></span></div>
+      <div class="nums-lista" id="r-nums"></div>
+      <div class="resumo-row total"><span>Total a pagar</span><span id="r-total">R$ 0</span></div>
+    </div>
+
+    <button class="btn btn-accent" id="btn-pagar" onclick="window.irPagar()" disabled>
+      A aguardar Nuvem...
+    </button>
+  </div>
+
+  <!-- ETAPA 2: PIX -->
+  <div id="etapa2" style="display:none">
+    <div class="card">
+      <div class="card-title mb-6">✅ Pedido registado!</div>
+      <p class="text-muted">Os seus números foram reservados. Pague agora via PIX para confirmar.</p>
+    </div>
+    <div class="card">
+      <div class="card-title mb-6">💸 Pagamento PIX</div>
+      <div class="pix-box">
+        <div class="pix-nome">Marcelo de Paula</div>
+        <div class="pix-banco">E-mail</div>
+        <div class="pix-chave-box" id="pix-chave-box" onclick="window.copiarPix()">lemosmjlp@gmail.com</div>
+        <div class="pix-copy-hint">👆 Toque para copiar a chave</div>
+        <div class="pix-valor" id="pix-valor"></div>
+        <div class="text-muted">valor a pagar</div>
+        <div class="pix-steps"><strong>Como pagar:</strong><br>1. Abra a app do seu banco<br>2. PIX → Pagar com chave (E-mail)<br>3. Cole a chave acima<br>4. Confirme o valor e pague<br>5. Guarde o comprovativo! 📲</div>
+      </div>
+    </div>
+    <div class="card" id="card-comprovante">
+      <div class="card-title mb-6">📎 Anexar Comprovativo</div>
+      <p class="text-muted mb-10" style="font-size:0.75rem">Anexe o print ou PDF do pagamento para acelerar a liberação.</p>
+      <input type="file" id="f-comprovante" accept="image/*,application/pdf" style="display:none" onchange="window.processarAnexo(event)">
+      <button class="btn btn-ghost" id="btn-anexo" onclick="document.getElementById('f-comprovante').click()">
+        📄 Escolher ficheiro...
+      </button>
+    </div>
+    <div class="card">
+      <div class="card-title mb-6">📋 Resumo do pedido</div>
+      <div class="resumo-row"><span>Nome</span><span id="p-nome" style="font-size:.85rem;text-align:right;max-width:60%"></span></div>
+      <div class="resumo-row"><span>Telefone</span><span id="p-tel" style="font-size:.85rem"></span></div>
+      <div class="resumo-row"><span>Números</span><span id="p-nums" style="font-size:.7rem;text-align:right;max-width:60%;color:var(--green)"></span></div>
+      <div class="resumo-row"><span>Pedido Nº</span><span id="p-id" style="font-size:.72rem;color:var(--muted)"></span></div>
+      <div class="resumo-row total"><span>Total</span><span id="p-total"></span></div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px; margin-top:16px;">
+      <button class="btn btn-accent" onclick="window.finalizarCompra()">✅ Finalizar e Sair</button>
+      <button class="btn btn-ghost" onclick="window.voltarEtapa1()">← Voltar e editar pedido</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     PÁGINA: LOGIN
+═══════════════════════════════ -->
+<div class="page" id="page-login">
+  <div class="login-wrap">
+    <div class="card">
+      <div class="card-title mb-6">🔒 Área administrativa</div>
+      <p class="text-muted mb-10">Acesso restrito. Autentique-se para continuar.</p>
+      <div class="form-group">
+        <label>E-mail do Administrador</label>
+        <input type="email" id="email-input" placeholder="admin@pratique.com">
+      </div>
+      <div class="form-group">
+        <label>Palavra-passe</label>
+        <input type="password" id="senha-input" placeholder="••••••••" onkeypress="if(event.key==='Enter')window.fazerLogin()">
+      </div>
+      <div class="tentativas-aviso" id="tentativas-aviso"></div>
+      <button class="btn btn-accent mt-10" id="btn-login" onclick="window.fazerLogin()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     PÁGINA: VALIDADOR
+═══════════════════════════════ -->
+<div class="page" id="page-validador">
+  <div class="stats" id="stats-v"></div>
+  <div class="card">
+    <div class="card-title mb-10">✅ Confirmar pagamentos</div>
+    <input class="busca" id="busca-v" placeholder="🔍 Procurar por nome, CPF ou telefone..." oninput="window.renderValidador()">
+    <div class="filtros">
+      <button class="filtro active" onclick="window.setFiltro('todos',this)">Todos</button>
+      <button class="filtro" onclick="window.setFiltro('pendente',this)">Pendentes</button>
+      <button class="filtro" onclick="window.setFiltro('pago',this)">Pagos</button>
+      <button class="filtro" onclick="window.setFiltro('expirado',this)">Expirados</button>
+    </div>
+    <div id="lista-v"></div>
+  </div>
+  <div class="card">
+    <div class="card-title mb-10">⚙️ Ferramentas Cloud</div>
+    <button class="btn btn-ghost" onclick="window.exportarCSV()" style="margin-bottom:8px">📥 Exportar Base (CSV)</button>
+    <button class="btn btn-danger" onclick="window.confirmarLimpar()">🗑️ Limpar Nuvem (Reiniciar rifa)</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     PÁGINA: SORTEIO
+═══════════════════════════════ -->
+<div class="page" id="page-sorteio">
+  <div class="stats" id="stats-s"></div>
+  <div class="card">
+    <div class="sorteio-arena" id="sorteio-arena">
+      <div style="font-size:4rem;margin-bottom:8px">🎪</div>
+      <div class="text-muted">Pronto para o grande sorteio?</div>
+    </div>
+    <button class="btn btn-accent" id="btn-sortear" onclick="window.sortear()">🎲 Realizar sorteio!</button>
+    <button class="btn btn-ghost" onclick="window.resetarSorteio()" style="margin-top:8px">🔄 Resetar Ecrã</button>
+  </div>
+  <div class="card" id="historico-card" style="display:none">
+    <div class="card-title mb-10">📜 Histórico na Nuvem</div>
+    <div id="historico-lista"></div>
+  </div>
+  <div class="card">
+    <div class="card-title mb-10">🏆 Participantes confirmados</div>
+    <div id="lista-s"></div>
+  </div>
+</div>
+
+<!-- ==============================================
+     SCRIPTS & FIREBASE REAL-TIME LOGIC
+=============================================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+// ═══════════════════════════════════════════════════════
+// AS SUAS CREDENCIAIS DO FIREBASE ESTÃO AQUI:
+// ═══════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyBtQJlHjNnOfzAgPFEkTODHprfbpOZXHD0",
+  authDomain: "rifa2026-6dbf3.firebaseapp.com",
+  projectId: "rifa2026-6dbf3",
+  storageBucket: "rifa2026-6dbf3.firebasestorage.app",
+  messagingSenderId: "606975394278",
+  appId: "1:606975394278:web:e9015f74a1863b4f751627",
+  measurementId: "G-34MQLW2GKD"
+};
+
+const C = {
+  TOTAL:       1000,
+  BLOCO:       100,
+  PRECO:       10,
+  PIX_CHAVE:   'lemosmjlp@gmail.com', 
+  MAX_LOGIN:   5,       
+  LOCK_MIN:    10,      
+};
+
+// Gerador Aleatório Seguro (Nível Criptográfico)
+function cryptoRandom() {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  return array[0] / (0xFFFFFFFF + 1);
+}
+
+// ESTADO GLOBAL
+let S = {
+  pedidos:     [],
+  sorteios:    [],
+  sel:         [],
+  adminLogado: false,
+  paginaAlvo:  null,
+  blocoAtual:  1,
+  loginTent:   0,
+  loginLock:   0,
+  filtro:      'todos'
+};
+let pedidoAtualId = null;
+
+// ═══════════════════════════════════════════════════════
+// INICIALIZAÇÃO FIREBASE (PRODUÇÃO)
+// ═══════════════════════════════════════════════════════
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let userId = null;
+
+const initAuth = async () => {
+  try {
+    // Para clientes normais, ligamos de forma silenciosa e anónima.
+    await signInAnonymously(auth);
+  } catch (err) {
+    console.error("Auth Firebase Falhou:", err);
+    toast("Erro ao ligar ao servidor", "err");
+  }
+};
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    userId = user.uid;
+    const btnPagar = document.getElementById('btn-pagar');
+    if (btnPagar && S.sel.length === 0) {
+        btnPagar.textContent = "Continuar para pagamento →";
+    }
+    setupRealtimeListeners();
+  }
+});
+
+// Apenas inicia se o utilizador já colocou as chaves
+if(firebaseConfig.apiKey !== "COLE_A_SUA_API_KEY_AQUI") {
+   initAuth();
+} else {
+   console.warn("⚠️ AVISO: O Firebase não está configurado. Insira as suas chaves na linha 483.");
+   document.getElementById('btn-pagar').textContent = "⚠️ Insira as chaves Firebase no código";
+}
+
+function setupRealtimeListeners() {
+  if (!userId) return;
+  // Caminhos para as coleções do Firestore na raiz
+  const pedRef = collection(db, 'pedidos');
+  onSnapshot(pedRef, (snap) => {
+    S.pedidos = snap.docs.map(d => d.data());
+    expirarAntigosCloud(); 
+    calcBlocoAtual();
+    renderGrade();
+    if (S.adminLogado && S.paginaAlvo === 'validador') window.renderValidador();
+    if (S.adminLogado && S.paginaAlvo === 'sorteio') renderSorteio();
+  });
+
+  const sortRef = collection(db, 'sorteios');
+  onSnapshot(sortRef, (snap) => {
+    S.sorteios = snap.docs.map(d => d.data());
+    if (S.adminLogado && S.paginaAlvo === 'sorteio') renderHistorico();
+  });
+}
+
+function expirarAntigosCloud() {
+  const agora = Date.now();
+  let mudouLocalmente = false;
+  S.pedidos.forEach(p => {
+    if (p.status === 'pendente' && agora - p.ts > 86400000) {
+      p.status = 'expirado';
+      mudouLocalmente = true;
+      if (S.adminLogado && userId) {
+        updateDoc(doc(db, 'pedidos', p.id), { status: 'expirado' }).catch(console.error);
+      }
+    }
+  });
+  return mudouLocalmente;
+}
+
+// ═══════════════════════════════════════════════════════
+// PERSISTÊNCIA DO ADMIN
+// ═══════════════════════════════════════════════════════
+function salvarLocal() {
+  try { localStorage.setItem('rifa_admin_prod', JSON.stringify({ tent: S.loginTent, lock: S.loginLock, admin: S.adminLogado })); } catch(e) {}
+}
+function carregarLocal() {
+  try {
+    const lo = localStorage.getItem('rifa_admin_prod');
+    if (lo) { const l = JSON.parse(lo); S.loginTent = l.tent || 0; S.loginLock = l.lock || 0; S.adminLogado = l.admin || false; }
+  } catch(e) {}
+}
+carregarLocal();
+
+// ═══════════════════════════════════════════════════════
+// MATEMÁTICA E BLOCOS
+// ═══════════════════════════════════════════════════════
+function calcPreco(qtd) {
+  let paidCount = 0;
+  let freeCount = 0;
+  let q = qtd;
+  while (q >= 13) { paidCount += 10; freeCount += 3; q -= 13; }
+  while (q >= 6)  { paidCount += 5;  freeCount += 1; q -= 6;  }
+  paidCount += q;
+  return { valor: paidCount * C.PRECO, bonus: freeCount };
+}
+
+function pad(n) { return String(n).padStart(3,'0'); }
+function getOcupados()  { const s=new Set(); S.pedidos.filter(p=>p.status==='pago').forEach(p=>p.nums.forEach(n=>s.add(n))); return s; }
+function getReservados(){ const s=new Set(); S.pedidos.filter(p=>p.status==='pendente').forEach(p=>p.nums.forEach(n=>s.add(n))); return s; }
+
+function calcBlocoAtual() {
+  const pagos = getOcupados();
+  let bloco = 1;
+  const totalBlocos = C.TOTAL / C.BLOCO;
+  while (bloco <= totalBlocos) {
+    const ini = (bloco-1)*C.BLOCO+1, fim = bloco*C.BLOCO;
+    let v=0;
+    for(let i=ini;i<=fim;i++) if(pagos.has(pad(i))) v++;
+    if (v < C.BLOCO) break;
+    bloco++;
+  }
+  S.blocoAtual = Math.min(bloco, totalBlocos);
+}
+
+// ═══════════════════════════════════════════════════════
+// GRADE DE NÚMEROS
+// ═══════════════════════════════════════════════════════
+function renderGrade() {
+  const grade = document.getElementById('grade');
+  const ocp = getOcupados(), res = getReservados();
+  const blocoFim = S.blocoAtual * C.BLOCO;
+  
+  grade.innerHTML = '';
+  S.sel = S.sel.filter(n => !ocp.has(n) && !res.has(n)); 
+
+  for (let i=1; i<=C.TOTAL; i++) {
+    const num = pad(i);
+    const div = document.createElement('div');
+    div.className = 'num-cell';
+    div.textContent = num;
+    if (i > blocoFim) {
+      div.classList.add('bloqueado');
+    } else if (ocp.has(num)) {
+      div.classList.add('ocupado');
+    } else if (res.has(num)) {
+      div.classList.add('reservado');
+    } else if (S.sel.includes(num)) {
+      div.classList.add('selecionado');
+      div.addEventListener('click', ()=>dessel(num, div));
+    } else {
+      div.addEventListener('click', ()=>selecionarNum(num, div));
+    }
+    grade.appendChild(div);
+  }
+  atualizarInfoGrade();
+  renderBlocos();
+}
+
+function selecionarNum(num, div) {
+  S.sel.push(num);
+  div.classList.add('selecionado');
+  div.removeEventListener('click', null);
+  div.addEventListener('click', ()=>dessel(num, div));
+  atualizarInfoGrade(); atualizarResumo();
+}
+function dessel(num, div) {
+  S.sel = S.sel.filter(n=>n!==num);
+  div.classList.remove('selecionado');
+  div.removeEventListener('click', null);
+  div.addEventListener('click', ()=>selecionarNum(num, div));
+  document.querySelectorAll('.pacote').forEach(p=>p.classList.remove('sel'));
+  atualizarInfoGrade(); atualizarResumo();
+}
+function atualizarInfoGrade() {
+  document.getElementById('grade-count').textContent = S.sel.length + ' sel.';
+  const ocp=getOcupados(), res=getReservados();
+  const ini=(S.blocoAtual-1)*C.BLOCO+1, fim=S.blocoAtual*C.BLOCO;
+  let disp=0;
+  for(let i=ini;i<=fim;i++){ const n=pad(i); if(!ocp.has(n)&&!res.has(n)&&!S.sel.includes(n)) disp++; }
+  document.getElementById('grade-sub').textContent = disp + ' disponíveis no bloco atual';
+}
+
+function renderBlocos() {
+  const totalB = C.TOTAL/C.BLOCO, ocp = getOcupados();
+  const ini=(S.blocoAtual-1)*C.BLOCO+1, fim=S.blocoAtual*C.BLOCO;
+  let vAtual=0;
+  for(let i=ini;i<=fim;i++) if(ocp.has(pad(i))) vAtual++;
+  document.getElementById('bloco-label').textContent  = `Bloco atual: ${pad(ini)} – ${pad(fim)}`;
+  document.getElementById('bloco-count').textContent  = `${vAtual}/${C.BLOCO} vendidos`;
+  document.getElementById('progress-fill').style.width = (vAtual/C.BLOCO*100)+'%';
+  const chips = document.getElementById('bloco-chips');
+  chips.innerHTML = '';
+  for(let b=1;b<=totalB;b++){
+    const bIni=(b-1)*C.BLOCO+1, bFim=b*C.BLOCO;
+    let v=0;
+    for(let i=bIni;i<=bFim;i++) if(ocp.has(pad(i))) v++;
+    const chip = document.createElement('div');
+    chip.textContent = pad(bIni)+'–'+pad(bFim);
+    chip.className = 'bloco-chip' + (v>=C.BLOCO?' cheio': b===S.blocoAtual?' atual': b>S.blocoAtual?' bloqueado':'');
+    chips.appendChild(chip);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// PACOTES CUMULATIVOS
+// ═══════════════════════════════════════════════════════
+window.aplicarPacote = function(qtd, el) {
+  const ocp=getOcupados(), res=getReservados();
+  let disp=[];
+  
+  const ini=(S.blocoAtual-1)*C.BLOCO+1, fim=S.blocoAtual*C.BLOCO;
+  for(let i=ini;i<=fim;i++){
+    const n=pad(i);
+    if(!ocp.has(n) && !res.has(n) && !S.sel.includes(n)) disp.push(n);
+  }
+
+  if(disp.length < qtd) {
+     disp = []; 
+     for (let i = 1; i <= C.TOTAL; i++) {
+        const n = pad(i);
+        if (!ocp.has(n) && !res.has(n) && !S.sel.includes(n)) disp.push(n);
+     }
+  }
+
+  for(let i=disp.length-1;i>0;i--){
+    const j=Math.floor(cryptoRandom()*(i+1));
+    [disp[i],disp[j]]=[disp[j],disp[i]];
+  }
+
+  if (disp.length < qtd) { toast(`Há apenas ${disp.length} números em toda a rifa!`,'err'); return; }
+  
+  const novos=disp.slice(0, qtd);
+  S.sel = [...S.sel, ...novos];
+  
+  document.querySelectorAll('.pacote').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel');
+  renderGrade(); atualizarResumo();
+  toast(`+${qtd} números adicionados ✨`, 'ok');
+}
+
+function atualizarResumo() {
+  const q = S.sel.length;
+  const resumo=document.getElementById('resumo'), btn=document.getElementById('btn-pagar');
+  if (q===0) { 
+      resumo.style.display='none'; 
+      btn.disabled=true; 
+      if(userId) btn.textContent = "Continuar para pagamento →";
+      return; 
+  }
+  
+  const {valor,bonus} = calcPreco(q);
+  resumo.style.display='block'; 
+  
+  if (userId) {
+      btn.disabled = false;
+      btn.textContent = "Continuar para pagamento →";
+  }
+
+  document.getElementById('r-qtd').textContent   = q+' número'+(q>1?'s':'');
+  document.getElementById('r-nums').textContent  = S.sel.join(' · ');
+  document.getElementById('r-total').textContent = 'R$ '+valor;
+  const rb=document.getElementById('r-bonus-row');
+  if(bonus>0){ rb.style.display='flex'; document.getElementById('r-bonus').textContent='+'+bonus+' grátis!'; }
+  else rb.style.display='none';
+}
+
+// ═══════════════════════════════════════════════════════
+// VALIDAÇÃO 
+// ═══════════════════════════════════════════════════════
+function validarCPF(cpf) {
+  cpf = cpf.replace(/\D/g,'');
+  if (cpf.length!==11 || /^(\d)\1+$/.test(cpf)) return false;
+  let s=0; for(let i=0;i<9;i++) s+=+cpf[i]*(10-i);
+  let r=11-(s%11); if(r>=10)r=0; if(r!==+cpf[9]) return false;
+  s=0; for(let i=0;i<10;i++) s+=+cpf[i]*(11-i);
+  r=11-(s%11); if(r>=10)r=0; return r===+cpf[10];
+}
+function validarEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function validarTel(t){ return t.replace(/\D/g,'').length>=10; }
+function setErro(campo, erroId, vis) {
+  document.getElementById(campo).classList.toggle('input-erro', vis);
+  document.getElementById(erroId).classList.toggle('vis', vis);
+}
+
+['f-nome', 'f-cpf', 'f-tel', 'f-email'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', () => {
+      const erroId = 'e-' + id.replace('f-', '');
+      if (document.getElementById(erroId)) setErro(id, erroId, false);
+    });
+  }
+});
+
+function validarForm() {
+  const nomeEl  = document.getElementById('f-nome');
+  const cpfEl   = document.getElementById('f-cpf');
+  const telEl   = document.getElementById('f-tel');
+  const emailEl = document.getElementById('f-email');
+
+  const nome  = nomeEl.value.trim();
+  const cpf   = cpfEl.value.trim();
+  const tel   = telEl.value.trim();
+  const email = emailEl.value.trim();
+  let ok = true;
+  let primeiroErro = null;
+  
+  if (!nome || nome.split(/\s+/).length < 2 || nome.length < 5) { 
+      setErro('f-nome','e-nome',true); ok=false; if(!primeiroErro) primeiroErro = nomeEl; 
+  } else setErro('f-nome','e-nome',false);
+  
+  if (!validarCPF(cpf))  { 
+      setErro('f-cpf','e-cpf',true);   ok=false; if(!primeiroErro) primeiroErro = cpfEl; 
+  } else setErro('f-cpf','e-cpf',false);
+  
+  if (!validarTel(tel))  { 
+      setErro('f-tel','e-tel',true);    ok=false; if(!primeiroErro) primeiroErro = telEl; 
+  } else setErro('f-tel','e-tel',false);
+  
+  if (!validarEmail(email)){ 
+      setErro('f-email','e-email',true); ok=false; if(!primeiroErro) primeiroErro = emailEl; 
+  } else setErro('f-email','e-email',false);
+  
+  if (primeiroErro) {
+      primeiroErro.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      primeiroErro.focus();
+  }
+  return ok;
+}
+
+// ═══════════════════════════════════════════════════════
+// CLOUD UPLOAD (Processando o Pagamento)
+// ═══════════════════════════════════════════════════════
+window.irPagar = async function() {
+  if (!userId) { toast('Erro: Sem ligação à Nuvem.', 'err'); return; }
+  if (!validarForm()) { toast('Corrija os campos destacados a vermelho','err'); return; }
+  if (S.sel.length===0) { toast('Selecione pelo menos 1 número!','err'); return; }
+
+  const ocp=getOcupados(), res=getReservados();
+  const conflito = S.sel.filter(n=>ocp.has(n)||res.has(n));
+  if (conflito.length) {
+    toast(`Ups! Número(s) ${conflito.join(', ')} foram levados por alguém agora mesmo.`,'err');
+    S.sel = S.sel.filter(n=>!conflito.includes(n));
+    renderGrade(); atualizarResumo(); return;
+  }
+
+  document.getElementById('btn-pagar').disabled = true;
+  document.getElementById('btn-pagar').textContent = "A Processar...";
+
+  const nome  = document.getElementById('f-nome').value.trim();
+  const tel   = document.getElementById('f-tel').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const end   = document.getElementById('f-end').value.trim();
+  const { valor } = calcPreco(S.sel.length);
+
+  const pedido = {
+    id:     'P' + Date.now() + Math.floor(cryptoRandom() * 1000),
+    ts:     Date.now(),
+    nome, cpf: document.getElementById('f-cpf').value.trim(), tel, email, end,
+    nums:   [...S.sel],
+    valor,
+    status: 'pendente',
+    comprovante: false
+  };
+
+  pedidoAtualId = pedido.id;
+
+  try {
+    const pRef = doc(db, 'pedidos', pedido.id);
+    await setDoc(pRef, pedido);
+    
+    document.getElementById('pix-valor').textContent = 'R$ '+valor;
+    document.getElementById('p-nome').textContent    = nome;
+    document.getElementById('p-tel').textContent     = tel;
+    document.getElementById('p-nums').textContent    = pedido.nums.join(', ');
+    document.getElementById('p-id').textContent      = pedido.id;
+    document.getElementById('p-total').textContent   = 'R$ '+valor;
+
+    const btnAnexo = document.getElementById('btn-anexo');
+    if(btnAnexo) {
+        btnAnexo.className = "btn btn-ghost";
+        btnAnexo.textContent = "📄 Escolher ficheiro...";
+        btnAnexo.disabled = false;
+    }
+    const fComp = document.getElementById('f-comprovante');
+    if(fComp) fComp.value = "";
+
+    document.getElementById('etapa1').style.display='none';
+    document.getElementById('etapa2').style.display='block';
+    window.scrollTo(0,0);
+  } catch(err) {
+    console.error(err);
+    toast('Ocorreu um erro ao guardar na nuvem.', 'err');
+  } finally {
+    document.getElementById('btn-pagar').disabled = false;
+    document.getElementById('btn-pagar').textContent = "Continuar para pagamento →";
+  }
+}
+
+window.voltarEtapa1 = function(){
+  document.getElementById('etapa1').style.display='block';
+  document.getElementById('etapa2').style.display='none';
+  window.scrollTo(0,0);
+}
+
+window.processarAnexo = async function(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  
+  const btn = document.getElementById('btn-anexo');
+  btn.textContent = "A processar...";
+  btn.disabled = true;
+
+  setTimeout(async () => {
+      if(userId && pedidoAtualId) {
+          try {
+              await updateDoc(doc(db, 'pedidos', pedidoAtualId), { 
+                  comprovante: true, 
+                  nomeArquivo: file.name 
+              });
+          } catch(err) { console.warn(err); }
+      }
+      
+      btn.className = "btn btn-green";
+      btn.textContent = "✅ Anexado: " + (file.name.length > 15 ? file.name.substring(0,15)+"..." : file.name);
+      toast("Comprovativo vinculado ao seu pedido!", "ok");
+  }, 600);
+}
+
+window.finalizarCompra = function(){
+  abrirModal(
+      '🎉 Transação Concluída!',
+      'O seu pedido foi finalizado com sucesso. Boa sorte no sorteio!',
+      () => {
+          S.sel=[];
+          ['f-nome','f-cpf','f-tel','f-email','f-end'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+          ['f-nome','f-cpf','f-tel','f-email'].forEach(id=>setErro(id,'e-'+id.replace('f-',''),false));
+          document.querySelectorAll('.pacote').forEach(p=>p.classList.remove('sel'));
+          
+          pedidoAtualId = null;
+          document.getElementById('etapa1').style.display='block';
+          document.getElementById('etapa2').style.display='none';
+          atualizarResumo(); renderGrade(); window.scrollTo(0,0);
+          toast('Sessão encerrada com sucesso.', 'ok');
+      }
+  );
+}
+
+window.copiarPix = async function(){
+  try {
+      await navigator.clipboard.writeText(C.PIX_CHAVE);
+      toast('Chave PIX copiada! ✅','ok');
+  } catch(err) {
+      toast('Chave: '+C.PIX_CHAVE);
+  }
+}
+
+document.getElementById('f-cpf').addEventListener('input',function(){
+  let v=this.value.replace(/\D/g,'').slice(0,11);
+  v=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  this.value=v;
+});
+document.getElementById('f-tel').addEventListener('input',function(){
+  let v=this.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>10) v=v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
+  else if(v.length>6) v=v.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3');
+  else if(v.length>2) v=v.replace(/(\d{2})(\d{0,5})/,'($1) $2');
+  this.value=v;
+});
+
+// ═══════════════════════════════════════════════════════
+// ADMIN & VALIDADOR 
+// ═══════════════════════════════════════════════════════
+function verificarURL(){
+  const p=new URLSearchParams(window.location.search).get('admin');
+  if(p==='validador'||p==='sorteio'){
+    S.paginaAlvo=p;
+    document.getElementById('nav-admin').style.display='flex';
+    document.getElementById('nav-v').classList.toggle('active',p==='validador');
+    document.getElementById('nav-s').classList.toggle('active',p==='sorteio');
+    
+    if (S.adminLogado) {
+        window.showAdminPage(p);
+    } else {
+        window.showPage('login');
+    }
+  }
+}
+
+window.fazerLogin = async function(){
+  const email = document.getElementById('email-input').value.trim();
+  const senha = document.getElementById('senha-input').value;
+  const btn = document.getElementById('btn-login');
+
+  if(!email || !senha) { toast('Preencha e-mail e palavra-passe.', 'err'); return; }
+
+  const agora=Date.now();
+  if(S.loginLock && agora < S.loginLock){
+    const min=Math.ceil((S.loginLock-agora)/60000);
+    toast(`Acesso bloqueado. Tente em ${min} min.`,'err'); return;
+  }
+  
+  btn.textContent = "A autenticar...";
+  btn.disabled = true;
+
+  try {
+      await signInWithEmailAndPassword(auth, email, senha);
+      S.loginTent=0; S.loginLock=0; S.adminLogado=true;
+      salvarLocal(); window.showAdminPage(S.paginaAlvo);
+      document.getElementById('senha-input').value='';
+      document.getElementById('tentativas-aviso').style.display='none';
+  } catch(err) {
+      S.loginTent++;
+      const rest=C.MAX_LOGIN-S.loginTent;
+      if(S.loginTent>=C.MAX_LOGIN){
+        S.loginLock=Date.now()+C.LOCK_MIN*60000; S.loginTent=0;
+        const av=document.getElementById('tentativas-aviso');
+        av.textContent=`Muitas tentativas. Bloqueado por ${C.LOCK_MIN} min.`;
+        av.style.display='block';
+      } else {
+        const av=document.getElementById('tentativas-aviso');
+        av.textContent=`Credenciais incorretas. ${rest} tentativa(s) restante(s).`;
+        av.style.display='block';
+      }
+      document.getElementById('senha-input').value='';
+      salvarLocal();
+  } finally {
+      btn.textContent = "Entrar";
+      btn.disabled = false;
+  }
+}
+
+window.fazerLogout = async function() {
+    if(auth) { try { await signOut(auth); } catch(e) {} }
+    S.adminLogado = false;
+    salvarLocal();
+    window.location.reload(); 
+}
+
+window.showPage = function(pg){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('page-'+pg);
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+}
+window.showAdminPage = function(pg){
+  document.getElementById('nav-v').classList.toggle('active',pg==='validador');
+  document.getElementById('nav-s').classList.toggle('active',pg==='sorteio');
+  window.showPage(pg);
+  calcBlocoAtual();
+  if(pg==='validador') window.renderValidador();
+  if(pg==='sorteio')   renderSorteio();
+}
+window.fecharModal = function(){ document.getElementById('modal').classList.remove('vis'); }
+function abrirModal(titulo, corpo, cbOk){
+  document.getElementById('modal-title').textContent=titulo;
+  document.getElementById('modal-body').textContent=corpo;
+  document.getElementById('modal-ok').onclick=()=>{ window.fecharModal(); cbOk(); };
+  document.getElementById('modal').classList.add('vis');
+}
+
+window.setFiltro = function(f,btn){
+  S.filtro=f;
+  document.querySelectorAll('.filtro').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  window.renderValidador();
+}
+
+window.renderValidador = function(){
+  const pagos=S.pedidos.filter(p=>p.status==='pago');
+  const pend=S.pedidos.filter(p=>p.status==='pendente');
+  const arrec=pagos.reduce((s,p)=>s+p.valor,0);
+  document.getElementById('stats-v').innerHTML=`
+    <div class="stat"><div class="stat-n text-green">${pagos.length}</div><div class="stat-l">Pagos</div></div>
+    <div class="stat"><div class="stat-n text-accent">${pend.length}</div><div class="stat-l">Pendentes</div></div>
+    <div class="stat"><div class="stat-n" style="font-size:1.1rem">R$${arrec}</div><div class="stat-l">Arrecadado</div></div>`;
+  
+  const busca=(document.getElementById('busca-v')?.value||'').toLowerCase();
+  const lista=S.pedidos
+    .filter(p=>(S.filtro==='todos'||p.status===S.filtro)&&
+               (!busca||p.nome.toLowerCase().includes(busca)||p.cpf.includes(busca)||p.tel.includes(busca)))
+    .sort((a,b)=>b.ts-a.ts);
+    
+  const el=document.getElementById('lista-v');
+  if(!lista.length){ el.innerHTML='<div class="empty">Nenhum pedido encontrado</div>'; return; }
+  
+  el.innerHTML=lista.map(p=>{
+    const data=new Date(p.ts).toLocaleString('pt-BR');
+    const horas=Math.max(0,24-(Date.now()-p.ts)/3600000).toFixed(1);
+    return `<div class="pedido-item">
+      <div class="pedido-top">
+        <div>
+          <div class="pedido-nome">${esc(p.nome)}</div>
+          <div class="pedido-meta">
+            CPF: ${esc(p.cpf)} · 📞 ${esc(p.tel)}<br>
+            📧 ${esc(p.email)}<br>
+            💰 R$ ${p.valor} · Pedido: ${esc(p.id)}<br>
+            🕒 ${data}${p.status==='pendente'?` · ⏳ Expira em ${horas}h`:''}
+            ${p.comprovante ? `<br><span style="color:#3b82f6;font-weight:600">📎 Comprovativo Anexado</span>` : ''}
+          </div>
+          <div class="pedido-nums">${esc(p.nums.join(' · '))}</div>
+        </div>
+        <div>
+          <span class="badge badge-${p.status}">${p.status}</span>
+          <div class="pedido-acoes" style="margin-top:8px">
+            ${p.status!=='pago'?`<button class="btn btn-green btn-sm" onclick="window.confirmarPag('${p.id}')">✅ Confirmar</button>`:''}
+            ${p.status==='pendente'?`<button class="btn btn-danger btn-sm" onclick="window.expirarPed('${p.id}')">❌ Expirar</button>`:''}
+            ${p.status==='pago'?`<button class="btn btn-ghost btn-sm" onclick="window.cancelarPag('${p.id}')">↩ Cancelar</button>`:''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function esc(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+window.confirmarPag = function(id){
+  const p=S.pedidos.find(x=>x.id===id); if(!p) return;
+  abrirModal('Confirmar pagamento', `Confirmar pagamento de R$ ${p.valor} de ${p.nome}?`,
+    ()=>{ 
+      if(!userId) { toast('Erro: Nuvem Offline', 'err'); return; }
+      updateDoc(doc(db, 'pedidos', id), { status: 'pago', tsPago: Date.now() })
+        .then(() => toast(`${p.nome} — confirmado ✅`,'ok'))
+        .catch(() => toast('Erro ao atualizar na nuvem', 'err'));
+    }
+  );
+}
+window.expirarPed = function(id){
+  const p=S.pedidos.find(x=>x.id===id); if(!p) return;
+  abrirModal('Expirar pedido',`Liberar os números de ${p.nome} de volta para a rifa?`,
+    ()=>{ 
+      if(!userId) { toast('Erro: Nuvem Offline', 'err'); return; }
+      updateDoc(doc(db, 'pedidos', id), { status: 'expirado' })
+        .then(() => toast('Pedido expirado — números liberados', 'ok'))
+        .catch(() => toast('Erro ao atualizar', 'err'));
+    }
+  );
+}
+window.cancelarPag = function(id){
+  const p=S.pedidos.find(x=>x.id===id); if(!p) return;
+  abrirModal('Cancelar pagamento',`Desfazer pagamento de ${p.nome}? Os números voltam a ficar disponíveis.`,
+    ()=>{ 
+      if(!userId) { toast('Erro: Nuvem Offline', 'err'); return; }
+      updateDoc(doc(db, 'pedidos', id), { status: 'expirado' })
+        .then(() => toast('Pagamento cancelado e números liberados', 'ok'))
+        .catch(() => toast('Erro ao atualizar', 'err'));
+    }
+  );
+}
+
+window.exportarCSV = function(){
+  const header='ID,Data,Nome,CPF,Telefone,Email,Endereço,Números,Valor,Status';
+  const linhas=S.pedidos.map(p=>[
+    p.id, new Date(p.ts).toLocaleString('pt-BR'),
+    `"${p.nome}"`, p.cpf, p.tel, p.email, `"${p.end||''}"`,
+    `"${p.nums.join(' ')}"`, p.valor, p.status
+  ].join(','));
+  const csv=[header,...linhas].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='rifa-arraia-cloud-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  toast('CSV exportado 📥','ok');
+}
+
+window.confirmarLimpar = function(){
+  abrirModal(
+    '⚠️ APAGAR NUVEM DA RIFA',
+    'Isto apaga TODOS os pedidos e sorteios diretamente no banco de dados permanentemente. Apenas faça isto após encerrar a rifa.',
+    ()=>{
+      if(!userId) { toast('Erro: Nuvem Offline', 'err'); return; }
+      toast('A apagar dados da nuvem...', 'ok');
+      S.pedidos.forEach(p => deleteDoc(doc(db, 'pedidos', p.id)));
+      S.sorteios.forEach(s => deleteDoc(doc(db, 'sorteios', s.id)));
+    }
+  );
+}
+
+// ═══════════════════════════════════════════════════════
+// SORTEIO CRIPTOGRÁFICO
+// ═══════════════════════════════════════════════════════
+let sorteioEmAndamento = false;
+
+function renderSorteio(){
+  const pagantes=S.pedidos.filter(p=>p.status==='pago');
+  const pool=[];
+  pagantes.forEach(p=>p.nums.forEach(n=>pool.push({n,dono:p.nome,id:p.id})));
+  document.getElementById('stats-s').innerHTML=`
+    <div class="stat"><div class="stat-n text-green">${pagantes.length}</div><div class="stat-l">Participantes</div></div>
+    <div class="stat"><div class="stat-n text-accent">${pool.length}</div><div class="stat-l">Números</div></div>
+    <div class="stat"><div class="stat-n" style="font-size:1.1rem">R$${pagantes.reduce((s,p)=>s+p.valor,0)}</div><div class="stat-l">Total</div></div>`;
+  const el=document.getElementById('lista-s');
+  if(!pagantes.length){ el.innerHTML='<div class="empty">Nenhum pagamento confirmado ainda</div>'; return; }
+  el.innerHTML=pagantes.map(p=>`
+    <div class="pedido-item">
+      <div class="pedido-top">
+        <div><div class="pedido-nome">${esc(p.nome)}</div><div class="pedido-nums">${esc(p.nums.join(' · '))}</div></div>
+        <span class="badge badge-pago">${p.nums.length} nº</span>
+      </div>
+    </div>`).join('');
+  renderHistorico();
+}
+
+window.sortear = function(){
+  if(sorteioEmAndamento){ toast('Sorteio em andamento...'); return; }
+  
+  const temPendentes = S.pedidos.some(p => p.status === 'pendente');
+  if (temPendentes) {
+     abrirModal('Sorteio Bloqueado', 'Existem números com estado PENDENTE na base. Expire ou aprove estes pedidos no Validador antes de sortear.', () => {});
+     return;
+  }
+
+  const pagantes=S.pedidos.filter(p=>p.status==='pago');
+  const pool=[];
+  pagantes.forEach(p=>p.nums.forEach(n=>pool.push({n,dono:p.nome})));
+  if(!pool.length){ toast('Nenhum participante confirmado!','err'); return; }
+
+  sorteioEmAndamento=true;
+  document.getElementById('btn-sortear').disabled=true;
+
+  const arena=document.getElementById('sorteio-arena');
+  let i=0;
+  const iv=setInterval(()=>{
+    const r=pool[Math.floor(cryptoRandom()*pool.length)];
+    arena.innerHTML=`<div class="sorteio-num">${r.n}</div>`;
+    i++;
+    if(i>30){
+      clearInterval(iv);
+      let idx=0;
+      for(let k=0;k<5;k++) idx=Math.floor(cryptoRandom()*pool.length);
+      const v=pool[idx];
+      arena.innerHTML=`
+        <div style="font-size:.75rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">🏆 Número sorteado</div>
+        <div class="sorteio-num">${v.n}</div>
+        <div class="sorteio-dono">🎉 ${esc(v.dono)}</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:8px">${new Date().toLocaleString('pt-BR')}</div>`;
+      
+      if(userId) {
+        const sId = 'S'+Date.now();
+        const sorteioObj = { id: sId, ts: Date.now(), numero: v.n, vencedor: v.dono };
+        setDoc(doc(db, 'sorteios', sId), sorteioObj);
+      }
+      
+      confetes();
+      toast(`🏆 ${v.dono} — Nº ${v.n}`,'ok');
+      sorteioEmAndamento=false;
+      document.getElementById('btn-sortear').disabled=false;
+    }
+  },100);
+}
+
+window.resetarSorteio = function(){
+  if(sorteioEmAndamento){ toast('Aguarde o sorteio terminar'); return; }
+  document.getElementById('sorteio-arena').innerHTML=`<div style="font-size:4rem;margin-bottom:8px">🎪</div><div class="text-muted">Pronto para o grande sorteio?</div>`;
+}
+
+function renderHistorico(){
+  const card=document.getElementById('historico-card');
+  const lista=document.getElementById('historico-lista');
+  if(!S.sorteios.length){ card.style.display='none'; return; }
+  card.style.display='block';
+  lista.innerHTML=[...S.sorteios].sort((a,b)=>b.ts - a.ts).map(s=>`
+    <div class="historico-item">
+      🏆 Nº <strong>${esc(s.numero)}</strong> — ${esc(s.vencedor)}
+      <span style="color:var(--muted);font-size:.7rem;margin-left:8px">${new Date(s.ts).toLocaleString('pt-BR')}</span>
+    </div>`).join('');
+}
+
+function confetes(){
+  const cores=['#f5a623','#22c55e','#3b82f6','#ef4444','#a855f7','#ffd700'];
+  for(let i=0;i<90;i++){
+    const d=document.createElement('div');
+    const sz=5+Math.random()*7;
+    d.style.cssText=`position:fixed;top:-12px;left:${Math.random()*100}vw;width:${sz}px;height:${sz}px;background:${cores[Math.floor(Math.random()*cores.length)]};border-radius:${Math.random()>.5?'50%':'2px'};z-index:9998;pointer-events:none;animation:drop ${1.4+Math.random()*1.8}s ease-in forwards;animation-delay:${Math.random()*.6}s`;
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(),3500);
+  }
+}
+const _sty=document.createElement('style');
+_sty.textContent='@keyframes drop{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(540deg);opacity:0}}';
+document.head.appendChild(_sty);
+
+function toast(msg,tipo){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast show'+(tipo?' '+tipo:'');
+  clearTimeout(t._tid);
+  t._tid=setTimeout(()=>t.className='toast',3400);
+}
+
+// INICIALIZAÇÃO SEGURA DA GRELHA
+try {
+  verificarURL();
+  renderGrade();
+} catch (e) {
+  console.error("Erro na inicialização da UI", e);
+}
+
+// Relógio interno: Verifica vencimentos a cada 1 minuto
+setInterval(() => {
+  if (expirarAntigosCloud()) {
+    calcBlocoAtual();
+    renderGrade();
+  }
+}, 60000);
+</script>
+</body>
+</html>
