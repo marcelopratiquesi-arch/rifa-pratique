@@ -474,7 +474,8 @@ let S = {
   blocoAtual:  1,
   loginTent:   0,
   loginLock:   0,
-  filtro:      'todos'
+  filtro:      'todos',
+  modoTurbo:   false
 };
 let pedidoAtualId = null;
 
@@ -488,6 +489,7 @@ let userId = null;
 
 const initAuth = async () => {
   try {
+    // Para clientes normais, ligamos de forma silenciosa e anónima.
     await signInAnonymously(auth);
   } catch (err) {
     console.error("Auth Firebase Falhou:", err);
@@ -498,22 +500,21 @@ const initAuth = async () => {
 onAuthStateChanged(auth, (user) => {
   if (user) {
     userId = user.uid;
+    
+    // 🛡️ BURACO 3 TAMPADO: Verifica a identidade verdadeira direto com o servidor do Google em vez do LocalStorage
+    S.adminLogado = !user.isAnonymous;
+    
     const btnPagar = document.getElementById('btn-pagar');
     if (btnPagar && S.sel.length === 0) {
         btnPagar.textContent = "Continuar para pagamento →";
     }
     setupRealtimeListeners();
+  } else {
+    S.adminLogado = false;
   }
 });
 
-initAuth();
-
-function setupRealtimeListeners() {
-  if (!userId) return;
-  const pedRef = collection(db, 'pedidos');
-  onSnapshot(pedRef, (snap) => {
-    S.pedidos = snap.docs.map(d => d.data());
-    expirarAntigosCloud(); 
+// Apenas inicia se o utilizador já colocou as chaves
     calcBlocoAtual();
     renderGrade();
     if (S.adminLogado && S.paginaAlvo === 'validador') window.renderValidador();
@@ -546,12 +547,13 @@ function expirarAntigosCloud() {
 // PERSISTÊNCIA DO ADMIN
 // ═══════════════════════════════════════════════════════
 function salvarLocal() {
-  try { localStorage.setItem('rifa_admin_prod', JSON.stringify({ tent: S.loginTent, lock: S.loginLock, admin: S.adminLogado })); } catch(e) {}
+  // 🛡️ BURACO 3 TAMPADO: adminLogado removido do armazenamento inseguro
+  try { localStorage.setItem('rifa_admin_prod', JSON.stringify({ tent: S.loginTent, lock: S.loginLock })); } catch(e) {}
 }
 function carregarLocal() {
   try {
     const lo = localStorage.getItem('rifa_admin_prod');
-    if (lo) { const l = JSON.parse(lo); S.loginTent = l.tent || 0; S.loginLock = l.lock || 0; S.adminLogado = l.admin || false; }
+    if (lo) { const l = JSON.parse(lo); S.loginTent = l.tent || 0; S.loginLock = l.lock || 0; }
   } catch(e) {}
 }
 carregarLocal();
@@ -1009,6 +1011,15 @@ window.setFiltro = function(f,btn){
   window.renderValidador();
 }
 
+window.toggleTurbo = function(el) {
+  S.modoTurbo = el.checked;
+  toast(el.checked ? '⚡ Modo Turbo ATIVADO! Aprovação num clique.' : 'Modo Turbo desativado', el.checked ? 'ok' : '');
+}
+
+window.copiarTexto = async function(txt) {
+  try { await navigator.clipboard.writeText(txt); toast('Copiado! ✅', 'ok'); } catch(e) {}
+}
+
 window.renderValidador = function(){
   const pagos=S.pedidos.filter(p=>p.status==='pago');
   const pend=S.pedidos.filter(p=>p.status==='pendente');
@@ -1019,10 +1030,12 @@ window.renderValidador = function(){
     <div class="stat"><div class="stat-n" style="font-size:1.1rem">R$${arrec}</div><div class="stat-l">Arrecadado</div></div>`;
   
   const busca=(document.getElementById('busca-v')?.value||'').toLowerCase();
+  
+  // ORDENAÇÃO INTELIGENTE: Pendentes mais antigos no topo, Pagos mais novos no topo
   const lista=S.pedidos
     .filter(p=>(S.filtro==='todos'||p.status===S.filtro)&&
                (!busca||p.nome.toLowerCase().includes(busca)||p.cpf.includes(busca)||p.tel.includes(busca)))
-    .sort((a,b)=>b.ts-a.ts);
+    .sort((a,b)=> S.filtro === 'pendente' ? a.ts - b.ts : b.ts - a.ts);
     
   const el=document.getElementById('lista-v');
   if(!lista.length){ el.innerHTML='<div class="empty">Nenhum pedido encontrado</div>'; return; }
@@ -1031,14 +1044,27 @@ window.renderValidador = function(){
     const data=new Date(p.ts).toLocaleString('pt-BR');
     const horas=Math.max(0,24-(Date.now()-p.ts)/3600000).toFixed(1);
     
+    // MENSAGEM WHATSAPP PRONTA
+    const wppMsg = encodeURIComponent(`Olá ${p.nome.split(' ')[0]}, vi que reservou os números (${p.nums.join(', ')}) na Rifa Pratique. Como posso ajudar com o pagamento?`);
+    const wppLink = `https://wa.me/55${p.tel.replace(/\D/g,'')}?text=${wppMsg}`;
+
     return `<div class="pedido-item">
+      <div class="pedido-extrato">
+          <div>
+              <div class="extrato-nome">${esc(p.nome)}</div>
+              <div class="extrato-acoes">
+                  <a href="${wppLink}" target="_blank" class="btn-icon btn-wpp">💬 WhatsApp</a>
+                  <button class="btn-icon" onclick="window.copiarTexto('${p.cpf}')">📋 CPF</button>
+              </div>
+          </div>
+          <div class="extrato-valor">R$ ${p.valor}</div>
+      </div>
       <div class="pedido-top">
         <div>
-          <div class="pedido-nome">${esc(p.nome)}</div>
           <div class="pedido-meta">
-            CPF: ${esc(p.cpf)} · 📞 ${esc(p.tel)}<br>
+            📞 ${esc(p.tel)}<br>
             📧 ${esc(p.email)}<br>
-            💰 R$ ${p.valor} · Pedido: ${esc(p.id)}<br>
+            💰 Pedido: ${esc(p.id)}<br>
             🕒 ${data}${p.status==='pendente'?` · ⏳ Expira em ${horas}h`:''}
           </div>
           <div class="pedido-nums">${esc(p.nums.join(' · '))}</div>
@@ -1046,7 +1072,7 @@ window.renderValidador = function(){
         <div>
           <span class="badge badge-${p.status}">${p.status}</span>
           <div class="pedido-acoes" style="margin-top:8px">
-            ${p.status === 'pendente' ? `<button class="btn btn-green btn-sm" onclick="window.confirmarPag('${p.id}')">✅ Confirmar</button>` : ''}
+            ${p.status === 'pendente' ? `<button class="btn btn-green btn-sm" onclick="window.confirmarPag('${p.id}')">⚡ Confirmar</button>` : ''}
             ${p.status === 'pendente' ? `<button class="btn btn-danger btn-sm" onclick="window.expirarPed('${p.id}')">❌ Expirar</button>` : ''}
             ${p.status === 'pago' ? `<button class="btn btn-ghost btn-sm" onclick="window.cancelarPag('${p.id}')">↩ Cancelar</button>` : ''}
           </div>
@@ -1060,14 +1086,20 @@ function esc(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;')
 
 window.confirmarPag = function(id){
   const p=S.pedidos.find(x=>x.id===id); if(!p) return;
-  abrirModal('Confirmar pagamento', `Confirmar pagamento de R$ ${p.valor} de ${p.nome}?`,
-    ()=>{ 
+  
+  const aprovar = () => {
       if(!userId) { toast('Erro: Nuvem Offline', 'err'); return; }
       updateDoc(doc(db, 'pedidos', id), { status: 'pago', tsPago: Date.now() })
         .then(() => toast(`${p.nome} — confirmado ✅`,'ok'))
         .catch(() => toast('Erro ao atualizar na nuvem', 'err'));
-    }
-  );
+  };
+
+  // MODO TURBO APROVA SEM MODAL
+  if(S.modoTurbo) {
+      aprovar();
+  } else {
+      abrirModal('Confirmar pagamento', `Confirmar pagamento de R$ ${p.valor} de ${p.nome}?`, aprovar);
+  }
 }
 window.expirarPed = function(id){
   const p=S.pedidos.find(x=>x.id===id); if(!p) return;
@@ -1112,10 +1144,16 @@ window.confirmarLimpar = function(){
     '⚠️ APAGAR NUVEM DA RIFA',
     'Isto apaga TODOS os pedidos e sorteios diretamente no banco de dados permanentemente. Apenas faça isto após encerrar a rifa.',
     ()=>{
-      if(!userId) { toast('Erro: Nuvem Offline', 'err'); return; }
-      toast('A apagar dados da nuvem...', 'ok');
-      S.pedidos.forEach(p => deleteDoc(doc(db, 'pedidos', p.id)));
-      S.sorteios.forEach(s => deleteDoc(doc(db, 'sorteios', s.id)));
+      // 🛡️ BURACO 2 TAMPADO: Exige palavra-passe escrita para evitar eliminação acidental
+      const confirmacao = prompt('ATENÇÃO: Para confirmar a exclusão de todos os dados, digite APAGAR:');
+      if (confirmacao === 'APAGAR') {
+          if(!userId) { toast('Erro: Nuvem Offline', 'err'); return; }
+          toast('A apagar dados da nuvem...', 'ok');
+          S.pedidos.forEach(p => deleteDoc(doc(db, 'pedidos', p.id)));
+          S.sorteios.forEach(s => deleteDoc(doc(db, 'sorteios', s.id)));
+      } else {
+          toast('Ação cancelada. Palavra incorreta.', 'err');
+      }
     }
   );
 }
@@ -1150,10 +1188,17 @@ window.sortear = function(){
   
   const temPendentes = S.pedidos.some(p => p.status === 'pendente');
   if (temPendentes) {
-     abrirModal('Sorteio Bloqueado', 'Existem números com estado PENDENTE na base. Expire ou aprove estes pedidos no Validador antes de sortear.', () => {});
+     // 🛡️ BURACO 1 TAMPADO: Transforma o bloqueio num aviso para não travar a festa!
+     abrirModal('⚠️ Sorteio com Pendentes', 'Existem números com estado PENDENTE. Se sortear agora, esses números não entram na roda. Deseja sortear mesmo assim?', () => {
+         executarSorteio();
+     });
      return;
   }
+  
+  executarSorteio();
+}
 
+function executarSorteio() {
   const pagantes=S.pedidos.filter(p=>p.status==='pago');
   const pool=[];
   pagantes.forEach(p=>p.nums.forEach(n=>pool.push({n,dono:p.nome})));
